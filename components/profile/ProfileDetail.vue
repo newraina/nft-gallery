@@ -111,9 +111,16 @@
           :show-active-check="false"
           :text="tab"
           @click="() => switchToTab(tab)" />
+
         <ChainDropdown class="ml-6" />
         <OrderByDropdown
-          v-if="activeTab !== ProfileTab.ACTIVITY"
+          v-if="
+            activeTab !== ProfileTab.ACTIVITY &&
+            activeTab !== ProfileTab.WATCHLIST
+          "
+          class="ml-6" />
+        <WatchlistTypeDropdown
+          v-if="activeTab === ProfileTab.WATCHLIST"
           class="ml-6" />
       </div>
       <div class="is-flex is-flex-direction-row is-hidden-widescreen mobile">
@@ -128,7 +135,14 @@
           @click="() => switchToTab(tab)" />
         <div class="is-flex mt-4 is-flex-wrap-wrap">
           <ChainDropdown class="mr-4" />
-          <OrderByDropdown v-if="activeTab !== ProfileTab.ACTIVITY" />
+          <OrderByDropdown
+            v-if="
+              activeTab !== ProfileTab.ACTIVITY &&
+              activeTab !== ProfileTab.WATCHLIST
+            " />
+          <WatchlistTypeDropdown
+            v-if="activeTab === ProfileTab.WATCHLIST"
+            class="ml-6" />
         </div>
       </div>
     </div>
@@ -164,6 +178,10 @@
         class="pt-7" />
 
       <Activity v-if="activeTab === ProfileTab.ACTIVITY" :id="id" />
+
+      <ProfileWatchlist
+        v-if="isMyProfile && activeTab === ProfileTab.WATCHLIST"
+        :id="id" />
     </div>
   </div>
 </template>
@@ -174,6 +192,8 @@ import { NeoButton, NeoModal } from '@kodadot1/brick'
 import TabItem from '@/components/shared/TabItem.vue'
 import Identity from '@/components/identity/IdentityIndex.vue'
 import ItemsGrid from '@/components/items/ItemsGrid/ItemsGrid.vue'
+import ProfileWatchlist from '~/components/profile/ProfileWatchlist.vue'
+import WatchlistTypeDropdown from '~/components/profile/WatchlistTypeDropdown.vue'
 import ProfileGrid from './ProfileGrid.vue'
 import ProfileActivity from './ProfileActivitySummery.vue'
 import FilterButton from './FilterButton.vue'
@@ -193,6 +213,7 @@ enum ProfileTab {
   CREATED = 'created',
   COLLECTIONS = 'collections',
   ACTIVITY = 'activity',
+  WATCHLIST = 'watchlist',
 }
 
 const NuxtLink = resolveComponent('NuxtLink')
@@ -205,12 +226,20 @@ const { urlPrefix, client } = usePrefix()
 const { isRemark } = useIsChain(urlPrefix)
 const listingCartStore = useListingCartStore()
 
-const tabs = [
-  ProfileTab.OWNED,
-  ProfileTab.CREATED,
-  ProfileTab.COLLECTIONS,
-  ProfileTab.ACTIVITY,
-]
+const tabs = computed(() => {
+  const tabs = [
+    ProfileTab.OWNED,
+    ProfileTab.CREATED,
+    ProfileTab.COLLECTIONS,
+    ProfileTab.ACTIVITY,
+  ]
+
+  if (isMyProfile.value) {
+    tabs.push(ProfileTab.WATCHLIST)
+  }
+
+  return tabs
+})
 
 const switchToTab = (tab: ProfileTab) => {
   activeTab.value = tab

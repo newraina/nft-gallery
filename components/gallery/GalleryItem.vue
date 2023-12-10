@@ -110,6 +110,19 @@
               <NeoIcon pack="fasl" icon="eye" class="mr-1" />
               <span v-if="pageViewCount === null">--</span>
               <span v-else>{{ formatNumber(pageViewCount) }}</span>
+
+              <div v-if="watchlistItem.ready.value" class="ml-1 cursor-pointer">
+                <NeoIcon
+                  v-if="watchlistItem.saved.value"
+                  pack="fass"
+                  icon="bookmark"
+                  @click="watchlistItem.remove" />
+                <NeoIcon
+                  v-else
+                  pack="fasl"
+                  icon="bookmark"
+                  @click="watchlistItem.add" />
+              </div>
             </div>
 
             <div class="is-flex is-flex-direction-row is-flex-wrap-wrap">
@@ -184,6 +197,7 @@ import {
   NeoIcon,
 } from '@kodadot1/brick'
 import { useFullscreen, useWindowSize } from '@vueuse/core'
+import useWatchlistItem from '~/composables/watchlist/useWatchlistItem'
 
 import { useGalleryItem } from './useGalleryItem'
 
@@ -220,6 +234,12 @@ const galleryItem = useGalleryItem()
 const { nft, nftMetadata, nftImage, nftAnimation, nftMimeType, nftResources } =
   galleryItem
 const collection = computed(() => nft.value?.collection)
+
+const watchlistItem = useWatchlistItem({
+  chain: urlPrefix.value,
+  type: 'nft',
+  id: route.params.id as string,
+})
 
 const triggerBuySuccess = computed(() => preferencesStore.triggerBuySuccess)
 
